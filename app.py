@@ -37,15 +37,16 @@ def signup(username, password, email):
         return True
     return False
 
-username = None
+
+global username 
 
 def main():
-    session_state = SessionState(username=None)
+    if 'username' not in st.session_state:
+        st.session_state.username = ''
     
     st.title("Welcome")
     
     lr = LinearRegression()
-    
 
 
     nav = st.sidebar.radio("Navigation", ["Login", "Home", "Prediction", "Contribute"])
@@ -61,8 +62,9 @@ def main():
 
             if st.button("Login"):
                 if login(username_input, password):
-                    session_state.username = username_input
+                    # st.session_state.username = username_input
                     st.success("Logged in successfully!")
+                    st.session_state.username = username_input
                     # return username
                 else:
                     st.error("Username or password incorrect.")
@@ -81,9 +83,6 @@ def main():
                     st.error("Username already exists.")
 
     elif nav == "Home":
-        if session_state.username:
-            st.write("Hii "+username+" , welcome to our page.")
-
         st.image("data/salary.png", width=500)
         data = pd.read_csv("data/Salary_Data.csv")
 
@@ -129,13 +128,16 @@ def main():
         data = pd.read_csv("data/Salary_Data.csv")
         st.header("Contribute to our data set")
         # Check if user is logged in
-        ex = st.number_input("Enter your experience (In years)", 0.00, 20.00, step=0.50)
-        sal = st.number_input("Enter your salary", 0.00, 1000000.00, step=1000.0)
-        if st.button("Submit"):
-            to_add = {"YearsExperience": [ex], "Salary": [sal]}
-            to_add = pd.DataFrame(to_add)
-            to_add.to_csv("data/Salary_Data.csv", mode='a', header=False, index=False)
-            st.success("Submitted Successfully")
+        if st.session_state.username == '':
+            st.error("Login to contribute")
+        else:
+            ex = st.number_input("Enter your experience (In years)", 0.00, 20.00, step=0.50)
+            sal = st.number_input("Enter your salary", 0.00, 1000000.00, step=1000.0)
+            if st.button("Submit"):
+                to_add = {"YearsExperience": [ex], "Salary": [sal]}
+                to_add = pd.DataFrame(to_add)
+                to_add.to_csv("data/Salary_Data.csv", mode='a', header=False, index=False)
+                st.success("Submitted Successfully")
 
 if __name__ == "__main__":
     main()
